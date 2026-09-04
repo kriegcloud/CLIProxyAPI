@@ -12,12 +12,16 @@ const (
 	codexBuiltinImage25FlareModelID    = "gpt-image-2.5-flare"
 	codexBuiltinImage25SunburstModelID = "gpt-image-2.5-sunburst"
 	codexBuiltinImage25ModelID         = "gpt-image-2.5"
-	xaiBuiltinImageModelID             = "grok-imagine-image"
-	xaiBuiltinImageQualityModelID      = "grok-imagine-image-quality"
-	xaiBuiltinImage20ModelID           = "grok-imagine-image-2.0"
-	xaiBuiltinVideoModelID             = "grok-imagine-video"
-	xaiBuiltinVideo15ModelID           = "grok-imagine-video-1.5"
-	xaiBuiltinVideo15PreviewID         = "grok-imagine-video-1.5-preview"
+	// DankStation vendor patch: gpt-daybreak-blue-latest is served by the ChatGPT
+	// Codex backend (visible in /backend-api/codex/models for this account) but is
+	// absent from the upstream models.json catalog, so it is injected as a builtin.
+	codexBuiltinDaybreakBlueModelID = "gpt-daybreak-blue-latest"
+	xaiBuiltinImageModelID          = "grok-imagine-image"
+	xaiBuiltinImageQualityModelID   = "grok-imagine-image-quality"
+	xaiBuiltinImage20ModelID        = "grok-imagine-image-2.0"
+	xaiBuiltinVideoModelID          = "grok-imagine-video"
+	xaiBuiltinVideo15ModelID        = "grok-imagine-video-1.5"
+	xaiBuiltinVideo15PreviewID      = "grok-imagine-video-1.5-preview"
 )
 
 // staticModelsJSON mirrors the top-level structure of models.json.
@@ -246,13 +250,67 @@ func GetXAIModels() []*ModelInfo {
 // not depend on remote models.json updates. Built-ins replace any matching IDs
 // already present in the provided slice.
 func WithCodexBuiltins(models []*ModelInfo) []*ModelInfo {
-	return upsertModelInfos(models,
+	models = upsertModelInfos(models,
 		codexBuiltinImage15ModelInfo(),
 		codexBuiltinImageModelInfo(),
 		codexBuiltinImage25FlareModelInfo(),
 		codexBuiltinImage25SunburstModelInfo(),
 		codexBuiltinImage25ModelInfo(),
 	)
+	// Only fill in when the remote catalog does not already carry the model, so an
+	// upstream definition wins as soon as router-for-me/models publishes one.
+	return appendModelInfosIfMissing(models, codexBuiltinDaybreakBlueModelInfo())
+}
+
+// codexBuiltinDaybreakBlueModelInfo mirrors the gpt-5.6-sol catalog entry shape with
+// the metadata reported by the Codex backend for gpt-daybreak-blue-latest
+// (DankStation vendor patch, 2026-09-04).
+func codexBuiltinDaybreakBlueModelInfo() *ModelInfo {
+	return &ModelInfo{
+		ID:                        codexBuiltinDaybreakBlueModelID,
+		Object:                    "model",
+		Created:                   1788480000, // 2026-09-03
+		OwnedBy:                   "openai",
+		Type:                      "openai",
+		DisplayName:               "Daybreak Blue",
+		Version:                   codexBuiltinDaybreakBlueModelID,
+		Description:               "Latest frontier agentic coding model for broad defensive cybersecurity work.",
+		ContextLength:             921000,
+		MaxCompletionTokens:       128000,
+		SupportedParameters:       []string{"tools"},
+		Thinking:                  &ThinkingSupport{Levels: []string{"low", "medium", "high", "xhigh", "max"}},
+		SupportedInputModalities:  []string{"text", "image"},
+		SupportedOutputModalities: []string{"text"},
+	}
+}
+
+// appendModelInfosIfMissing appends each extra whose ID is not already present.
+func appendModelInfosIfMissing(models []*ModelInfo, extras ...*ModelInfo) []*ModelInfo {
+	present := make(map[string]struct{}, len(models))
+	for _, model := range models {
+		if model == nil {
+			continue
+		}
+		if id := strings.ToLower(strings.TrimSpace(model.ID)); id != "" {
+			present[id] = struct{}{}
+		}
+	}
+	out := models
+	for _, extra := range extras {
+		if extra == nil {
+			continue
+		}
+		id := strings.ToLower(strings.TrimSpace(extra.ID))
+		if id == "" {
+			continue
+		}
+		if _, exists := present[id]; exists {
+			continue
+		}
+		present[id] = struct{}{}
+		out = append(out, cloneModelInfo(extra))
+	}
+	return out
 }
 
 // WithXAIBuiltins injects hard-coded xAI image/video model definitions that should
