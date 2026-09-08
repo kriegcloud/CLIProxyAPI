@@ -12,7 +12,7 @@ mise exec -- go test ./internal/registry/
 mise exec -- go build -trimpath \
   -ldflags "-s -w -X main.Version=${version} -X main.Commit=${commit} -X main.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   -o bin/cli-proxy-api ./cmd/server
-./bin/cli-proxy-api --version | head -1
+./bin/cli-proxy-api -h 2>/dev/null | head -1   # banner line; no --version flag exists
 if [[ "${1:-}" == "--restart" ]]; then
   systemctl --user restart cli-proxy-api
   sleep 2

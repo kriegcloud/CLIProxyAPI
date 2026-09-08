@@ -9,8 +9,11 @@ Codex builtin in `internal/registry/model_definitions.go` (`WithCodexBuiltins`),
 which survives remote catalog refreshes. It is appended only when the remote
 catalog lacks it, so an upstream definition wins once one is published.
 
-Branch: `dankstation/daybreak` on top of tag `v7.2.149` (the pacman
-`cli-proxy-api-bin` version at the time). Go 1.26.8 is pinned via `mise.toml`.
+Branch: `dankstation/daybreak`, rebased onto tag `v7.2.155` on 2026-09-08 (was
+`v7.2.149`, the pacman `cli-proxy-api-bin` version at the time). Go 1.26.8 is
+pinned via `mise.toml`. `v7.2.155` carries `gpt-6-astra` in the stock catalog, so
+the default `claudex` model needs no vendor patch; only Daybreak Blue does.
+Reference upstream checkout: `~/YeeBois/dev/CLIProxyAPI`.
 
 ## Build / install
 
@@ -28,7 +31,7 @@ fall back to `/usr/bin/cli-proxy-api`.
 
 ```sh
 TOK="$(cat ~/.cli-proxy-api/client-token)"
-curl -s -H "Authorization: Bearer $TOK" http://127.0.0.1:8317/v1/models | grep -o 'gpt-daybreak[^"]*'
+curl -s -H "Authorization: Bearer $TOK" http://127.0.0.1:8317/v1/models | grep -o 'gpt-\(6-astra\|daybreak\)[^"]*'
 curl -s -X POST http://127.0.0.1:8317/v1/messages -H "x-api-key: $TOK" -H "anthropic-version: 2023-06-01" \
   -H "content-type: application/json" \
   -d '{"model":"gpt-daybreak-blue-latest(medium)","max_tokens":20,"messages":[{"role":"user","content":"Reply with exactly: OK"}]}'
@@ -56,3 +59,18 @@ To refresh the live catalog from the backend (shows what the account can use):
 ```sh
 mise exec -- go run ./cmd/fetch_codex_models --auths-dir ~/.cli-proxy-api --output /tmp/codex-live.json
 ```
+
+## Codex credential gotcha (2026-09-08)
+
+The admitted Codex OAuth file (`~/.cli-proxy-api/codex-*-pro.json`) logged
+`refresh_token_invalidated` while `~/.codex/auth.json` was fresh: the ChatGPT
+refresh token rotates, so a credential copied from the Codex CLI is invalidated
+the next time the CLI refreshes. Re-admit with a separate login instead of
+copying tokens:
+
+```sh
+./bin/cli-proxy-api --config ~/.cli-proxy-api/config.yaml --codex-login
+```
+
+Symptom when it finally expires: `503 auth_unavailable: no auth available
+(providers=codex, …)` on every `gpt-*` model while `codex exec` works.
