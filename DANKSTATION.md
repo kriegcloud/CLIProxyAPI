@@ -9,7 +9,7 @@ Codex builtin in `internal/registry/model_definitions.go` (`WithCodexBuiltins`),
 which survives remote catalog refreshes. It is appended only when the remote
 catalog lacks it, so an upstream definition wins once one is published.
 
-Branch: `dankstation/daybreak`, rebased onto tag `v7.2.155` on 2026-09-08 (was
+Branch: `dankstation/daybreak`, rebased onto tag `v7.3.12` on 2026-09-22 (previously `v7.2.155` on 2026-09-08; before that
 `v7.2.149`, the pacman `cli-proxy-api-bin` version at the time). Go 1.26.8 is
 pinned via `mise.toml`. `v7.2.155` carries `gpt-6-astra` in the stock catalog, so
 the default `claudex` model needs no vendor patch; only Daybreak Blue does.
