@@ -15,6 +15,35 @@ pinned via `mise.toml`. `v7.2.155` carries `gpt-6-astra` in the stock catalog, s
 the default `claudex` model needs no vendor patch; only Daybreak Blue does.
 Reference upstream checkout: `~/YeeBois/dev/CLIProxyAPI`.
 
+## Workstation update, 2026-10-06
+
+The vendor branch now merges upstream `v8.0.16` (source merge `f84dfd0f`),
+preserving the Daybreak builtin. The installed binary reports
+`8.0.16-dankstation.1`. Registry, Meta authentication, configuration, and SDK
+login tests passed before the service restart. The separate reference checkout
+at `~/YeeBois/dev/CLIProxyAPI` is fast-forwarded to the same upstream tag.
+
+Meta/Muse OAuth is admitted from the existing Muse Code device session. A
+credential exchange confirmed an active Everyday Usage subscription with no
+payment required before admission. The proxy exposes Muse Spark 1.3 alongside
+the existing providers; all 52 previously exposed model IDs remained present.
+OpenAI chat completions and Anthropic messages both returned successful Muse
+responses. The `claudem` zsh function uses the existing `_claude_proxy` helper,
+selects `muse-spark-1.3(medium)`, and remains outside automatic fallback routing.
+Reload the shell configuration or open a new terminal to use it. Native `muse`
+continues to use its existing direct Meta login.
+
+The mode-0600 proxy auth file is under the configured auth directory. Never
+print it or copy it into this repository. Reauthentication, if needed, uses
+`bin/cli-proxy-api --config ~/.cli-proxy-api/config.yaml --meta-login`.
+
+Rollback material is under `~/.local/state/cliproxyapi/upgrades/20261006/`:
+the previous binary, original configuration, and shell configuration. The
+Git branch `backup/pre-v8-20261006` retains the previous vendor source. To
+roll back the service, atomically replace `bin/cli-proxy-api` with the saved
+binary and restart the user service. The original configuration is unchanged.
+Remove the added Meta auth file and `claudem` function to undo Muse admission.
+
 ## Build / install
 
 ```sh
