@@ -42,6 +42,11 @@ func TestAIStudioTranslateRequestPreservesSummaryFromOriginalRequest(t *testing.
 }
 
 func TestAIStudioTranslateRequestNormalizesThinkingLevel(t *testing.T) {
+	reg := registry.GetGlobalRegistry()
+	clientID := "aistudio-thinking-level-fixture"
+	reg.RegisterClient(clientID, "aistudio", []*registry.ModelInfo{{ID: "gemini-3.7-flash", Thinking: &registry.ThinkingSupport{Levels: []string{"low", "medium", "high"}}}})
+	t.Cleanup(func() { reg.UnregisterClient(clientID) })
+
 	executor := NewAIStudioExecutor(&config.Config{}, "aistudio", nil)
 	req := cliproxyexecutor.Request{
 		Model: "gemini-3.8-flash",

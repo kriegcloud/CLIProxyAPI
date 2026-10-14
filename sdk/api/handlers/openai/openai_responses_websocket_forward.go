@@ -169,6 +169,7 @@ func (h *OpenAIResponsesAPIHandler) forwardResponsesWebsocket(
 				}
 				collectResponsesWebsocketOutputItem(payloads[i], outputItemsByIndex, &outputItemsFallback)
 				eventType := gjson.GetBytes(payloads[i], "type").String()
+				opts.localInterrupt.observe(payloads[i])
 				if isResponsesWebsocketCompletionEvent(eventType) && (opts.preserveCompletionOutput == nil || !opts.preserveCompletionOutput()) {
 					payloads[i] = restoreResponsesWebsocketCompletionOutput(payloads[i], outputItemsByIndex, outputItemsFallback)
 				}
@@ -267,6 +268,7 @@ func completeResponsesWebsocketLocalInterrupt(
 		cancel(errSet)
 		return output, responseID, sortedStringSet(pendingToolCallIDs), nil, errSet
 	}
+	cancel(context.Canceled)
 	if errWrite := writeResponsesWebsocketPayload(writer, wsTimelineLog, incomplete, time.Now()); errWrite != nil {
 		cancel(errWrite)
 		return output, responseID, sortedStringSet(pendingToolCallIDs), nil, errWrite

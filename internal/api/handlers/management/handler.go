@@ -128,6 +128,12 @@ func (h *Handler) SetConfig(cfg *config.Config) {
 	}
 	cloned := cfg.CloneForRuntime()
 	h.mu.Lock()
+	// A reload of an older disk revision must not replace a newer saved edit
+	// while its Management API reload is still pending.
+	if h.reloadGeneration > h.appliedReloadGeneration {
+		h.mu.Unlock()
+		return
+	}
 	h.cfg = cloned
 	h.mu.Unlock()
 }
