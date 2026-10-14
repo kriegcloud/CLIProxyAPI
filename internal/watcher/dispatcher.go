@@ -118,6 +118,10 @@ func (w *Watcher) dispatchPersistedAuthUpdateWithRevision(update *AuthUpdate) (b
 		w.currentAuths = make(map[string]*coreauth.Auth)
 	}
 	w.currentAuths[clone.ID] = clone
+	if w.persistedAuthObservations == nil {
+		w.persistedAuthObservations = make(map[string]uint64)
+	}
+	w.persistedAuthObservations[clone.ID] = w.fileObservations[normalized]
 	if update.ID == "" {
 		update.ID = clone.ID
 	}
@@ -164,7 +168,18 @@ func (w *Watcher) refreshAuthState(force bool) {
 		}
 	}
 	for _, auth := range w.currentAuths {
-		if auth != nil && changedDuringScan(auth) {
+		if auth == nil {
+			continue
+		}
+		path := auth.Attributes[coreauth.AttributePath]
+		if path == "" {
+			path = auth.Attributes[coreauth.AttributeSource]
+		}
+		normalized := w.normalizeAuthPath(path)
+		observed, persisted := w.persistedAuthObservations[auth.ID]
+		// Config rescans must not replace a persisted Management API update with
+		// an unversioned file snapshot. A new filesystem observation admits edits.
+		if changedDuringScan(auth) || (persisted && observed == w.fileObservations[normalized]) {
 			auths = append(auths, auth.Clone())
 		}
 	}
