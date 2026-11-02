@@ -68,6 +68,7 @@ type Watcher struct {
 	pluginAuthParser           synthesizer.PluginAuthParser
 	mirroredAuthDir            string
 	oldConfigYaml              []byte
+	persistedAuthObservations  map[string]uint64
 }
 
 // AuthUpdateAction represents the type of change detected in auth sources.

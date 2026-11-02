@@ -125,6 +125,10 @@ func (w *Watcher) dispatchPersistedAuthUpdateWithRevision(update *AuthUpdate) (b
 		w.currentAuths = make(map[string]*coreauth.Auth)
 	}
 	w.currentAuths[clone.ID] = clone
+	if w.persistedAuthObservations == nil {
+		w.persistedAuthObservations = make(map[string]uint64)
+	}
+	w.persistedAuthObservations[clone.ID] = w.fileObservations[normalized]
 	if update.ID == "" {
 		update.ID = clone.ID
 	}
@@ -238,8 +242,10 @@ func (w *Watcher) refreshAuthState(force bool) {
 	// those concurrent changes, including deletions, instead of publishing stale data.
 	changedDuringScan := func(auth *coreauth.Auth) bool {
 		normalized := authPath(auth)
+		observed, persisted := w.persistedAuthObservations[auth.ID]
 		return previous[auth.ID] != w.authRevisions[auth.ID] ||
-			previousFiles[normalized] != w.fileObservations[normalized]
+			previousFiles[normalized] != w.fileObservations[normalized] ||
+			(persisted && observed == w.fileObservations[normalized])
 	}
 	persistedDuringScan := func(auth *coreauth.Auth) bool {
 		if previous[auth.ID] == w.authRevisions[auth.ID] {

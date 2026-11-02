@@ -134,7 +134,7 @@ func (h *Handler) SetConfig(cfg *config.Config) {
 	cloned := cfg.CloneForRuntime()
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	if h.isStaleConfigFileSnapshotLocked(cloned) {
+	if h.reloadGeneration > h.appliedReloadGeneration || h.isStaleConfigFileSnapshotLocked(cloned) {
 		log.Debug("management: ignoring config reload parsed from an older config file version")
 		return
 	}
