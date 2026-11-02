@@ -34,14 +34,15 @@ superseded: gpt-5.6-sol, gpt-6-sol, grok-4.6, gpt-5.6-luna, claude-opus-5, claud
 
 ## Latest workstation update, 2026-11-01
 
-The live binary is now built from worktree
-`~/YeeBois/workstation-apps/worktrees/CLIProxyAPI/update-20261101`: upstream
-`origin/main` at `7cad1cb7` (v8.0.51) plus the uncommitted DankStation overlay,
-replayed with `git diff --binary HEAD` from the previous `update-20261031` worktree
-and `git apply --3way` (clean). The `Upgrading` rebase recipe below is superseded
-by this overlay-replay flow. Registry, watcher, claude auth, management, executor
-and OpenAI handler tests passed. The binary reports `8.0.51-dankstation.1` and is
-copied to `CLIProxyAPI/bin/cli-proxy-api` (the path the systemd drop-in runs).
+The vendor changes now live in the fork **`kriegcloud/CLIProxyAPI`**, branch
+`dankstation/main`: five `dankstation:` commits on upstream `7cad1cb7` (v8.0.51).
+This checkout is the only one: `origin` = the fork, `upstream` = router-for-me,
+local `main` mirrors `upstream/main`. Older vendor branches (including
+`dankstation/daybreak`) are preserved on the fork as `archive/*`. Before the fork
+the overlay lived uncommitted in per-update worktrees; those snapshots are in
+`~/ai/tmp/update-20261101/retired-cliproxy-worktrees/`. Registry, watcher, claude
+auth, management, executor and OpenAI handler tests passed. The binary reports `8.0.51-dankstation.1` and is
+built in place at `CLIProxyAPI/bin/cli-proxy-api` (the path the systemd drop-in runs).
 After restart all 209 model ids were still listed, and `gpt-6.1-sol(medium)`,
 `claude-opus-5-5` and `grok-4.7` each answered a 20-token smoke.
 
@@ -123,10 +124,19 @@ backend's naming of the served deployment.
 ## Upgrading
 
 ```sh
-git fetch origin --tags
-git rebase v<new-tag>          # or merge; the patch is one hunk in model_definitions.go
-DANKSTATION_BUILD_SERIAL=1 ./dankstation-build.sh --restart
+git fetch upstream --tags && git fetch origin
+git branch -f main upstream/main
+git switch dankstation/main
+git rebase upstream/main            # or a release tag; resolve conflicts in the dankstation: commits
+DANKSTATION_BUILD_SERIAL=1 ./dankstation-build.sh          # gofmt, registry tests, build bin/
+# targeted tests: go test ./internal/registry/... ./internal/watcher/... ./internal/auth/claude/... \
+#   ./internal/api/handlers/management/... ./internal/runtime/executor/... ./sdk/api/handlers/openai/...
+cp -p bin/cli-proxy-api ~/ai/tmp/update-$(date +%Y%m%d)/cli-proxy-api.before   # before building, for rollback
+systemctl --user restart cli-proxy-api   # then run the Verify block
+git push --force-with-lease origin dankstation/main
 ```
+
+Keep each vendor change as its own `dankstation:` commit so rebases stay reviewable.
 
 If the upstream catalog gains `gpt-daybreak-blue-latest`, the builtin becomes a
 no-op and the patch can be dropped along with the systemd drop-in.
