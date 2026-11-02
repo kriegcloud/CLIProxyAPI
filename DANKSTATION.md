@@ -14,7 +14,7 @@ Fork: `kriegcloud/CLIProxyAPI`, branch `dankstation/main` (upstream v8.0.51 plus
 `archive/dankstation/daybreak`). Go is pinned via `mise.toml`. The stock catalog
 carries `gpt-6-astra`, `gpt-6.1-sol` and `grok-4.7`, so only Daybreak Blue needs
 the registry patch; the other commits are runtime fixes.
-Reference upstream checkout: `~/YeeBois/dev/CLIProxyAPI`.
+Upstream reference: the `upstream` remote and local `main` in this checkout (the separate `~/YeeBois/dev/CLIProxyAPI` clone was removed 2026-11-01).
 
 ## Routing roles, 2026-10-14
 
