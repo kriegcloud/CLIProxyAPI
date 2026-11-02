@@ -34,6 +34,7 @@ type responsesLocalInterrupt struct {
 	active       bool
 	wsTurnActive bool
 	frames       chan []byte
+	responseID   string
 }
 
 func newResponsesLocalInterrupt() *responsesLocalInterrupt {
@@ -50,6 +51,7 @@ func (s *responsesLocalInterrupt) begin(websocketOwned bool) {
 	s.mu.Lock()
 	s.active = true
 	s.wsTurnActive = websocketOwned
+	s.responseID = ""
 	s.mu.Unlock()
 }
 
@@ -115,7 +117,7 @@ func (s *responsesLocalInterrupt) deliver(payload []byte) bool {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if !s.active || s.wsTurnActive {
+	if !s.active || s.wsTurnActive || s.responseID == "" || strings.TrimSpace(gjson.GetBytes(payload, "response_id").String()) != s.responseID {
 		return false
 	}
 	select {
@@ -123,6 +125,24 @@ func (s *responsesLocalInterrupt) deliver(payload []byte) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+// observe binds HTTP cancellation to the response being forwarded and ends it
+// before publishing terminal events to the downstream reader.
+func (s *responsesLocalInterrupt) observe(payload []byte) {
+	if s == nil {
+		return
+	}
+	event := gjson.GetBytes(payload, "type").String()
+	if isResponsesWebsocketCompletionEvent(event) || event == "response.incomplete" || event == "response.failed" {
+		s.end()
+		return
+	}
+	if event == "response.created" {
+		s.mu.Lock()
+		s.responseID = strings.TrimSpace(gjson.GetBytes(payload, "response.id").String())
+		s.mu.Unlock()
 	}
 }
 
