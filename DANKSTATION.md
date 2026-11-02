@@ -148,6 +148,18 @@ To refresh the live catalog from the backend (shows what the account can use):
 mise exec -- go run ./cmd/fetch_codex_models --auths-dir ~/.cli-proxy-api --output /tmp/codex-live.json
 ```
 
+## Re-measuring the Claude header pin
+
+`claude-header-defaults` in `~/.cli-proxy-api/config.yaml` must look like a real
+Claude Code client or Fable fails Anthropic's version gate. When Claude Code
+updates, capture what it actually sends: run a throwaway local HTTP listener that
+logs request headers (drop any auth/key/token headers) and answers 400, point a
+scrubbed `env -i ... ANTHROPIC_BASE_URL=http://127.0.0.1:<port> claude -p hi`
+at it, then copy `user-agent`, `x-stainless-package-version` and
+`x-stainless-runtime-version` into the config. `-p` mode reports
+`(external, sdk-cli)`; keep the interactive `(external, cli)` suffix. The proxy
+hot-reloads the config. 2026-11-01: 2.1.316 / 0.128.0 / v26.12.1 (was 2.1.280).
+
 ## Codex credential gotcha (2026-09-08)
 
 The admitted Codex OAuth file (`~/.cli-proxy-api/codex-*-pro.json`) logged
