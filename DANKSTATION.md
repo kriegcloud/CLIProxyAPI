@@ -128,10 +128,10 @@ git fetch upstream --tags && git fetch origin
 git branch -f main upstream/main
 git switch dankstation/main
 git rebase upstream/main            # or a release tag; resolve conflicts in the dankstation: commits
-DANKSTATION_BUILD_SERIAL=1 ./dankstation-build.sh          # gofmt, registry tests, build bin/
+mkdir -p ~/ai/tmp/update-$(date +%Y%m%d) && cp -p bin/cli-proxy-api ~/ai/tmp/update-$(date +%Y%m%d)/cli-proxy-api.before
+DANKSTATION_BUILD_SERIAL=1 ./dankstation-build.sh          # gofmt, registry tests, build bin/ (overwrites the live binary file)
 # targeted tests: go test ./internal/registry/... ./internal/watcher/... ./internal/auth/claude/... \
 #   ./internal/api/handlers/management/... ./internal/runtime/executor/... ./sdk/api/handlers/openai/...
-cp -p bin/cli-proxy-api ~/ai/tmp/update-$(date +%Y%m%d)/cli-proxy-api.before   # before building, for rollback
 systemctl --user restart cli-proxy-api   # then run the Verify block
 git push --force-with-lease origin dankstation/main
 ```
