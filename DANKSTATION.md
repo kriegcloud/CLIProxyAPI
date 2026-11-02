@@ -9,10 +9,11 @@ Codex builtin in `internal/registry/model_definitions.go` (`WithCodexBuiltins`),
 which survives remote catalog refreshes. It is appended only when the remote
 catalog lacks it, so an upstream definition wins once one is published.
 
-Branch: `dankstation/daybreak`, rebased onto tag `v7.3.12` on 2026-09-22 (previously `v7.2.155` on 2026-09-08; before that
-`v7.2.149`, the pacman `cli-proxy-api-bin` version at the time). Go 1.26.8 is
-pinned via `mise.toml`. `v7.2.155` carries `gpt-6-astra` in the stock catalog, so
-the default `claudex` model needs no vendor patch; only Daybreak Blue does.
+Fork: `kriegcloud/CLIProxyAPI`, branch `dankstation/main` (upstream v8.0.51 plus
+`dankstation:` commits as of 2026-11-01; history before the fork is on
+`archive/dankstation/daybreak`). Go is pinned via `mise.toml`. The stock catalog
+carries `gpt-6-astra`, `gpt-6.1-sol` and `grok-4.7`, so only Daybreak Blue needs
+the registry patch; the other commits are runtime fixes.
 Reference upstream checkout: `~/YeeBois/dev/CLIProxyAPI`.
 
 ## Routing roles, 2026-10-14
