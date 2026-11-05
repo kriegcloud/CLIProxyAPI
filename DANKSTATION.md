@@ -33,7 +33,29 @@ which the registry now lists. Daybreak stays routable only when a task names it:
 superseded: gpt-5.6-sol, gpt-6-sol, grok-4.6, gpt-5.6-luna, claude-opus-5, claude-opus-5-thinking-high, muse-spark-1.3, grok-4.5, gpt-5.4, gpt-5.4-mini
 <!-- beep-models:end deprecated-routable -->
 
-## Latest workstation update, 2026-11-01
+## Latest workstation update, 2026-11-05
+
+Merged upstream `c2f402b4` (v8.0.57, 68 commits since the previous base) into
+`dankstation/main`, preserving the published vendor history and local fixes.
+The interruption fix now uses upstream's `ojson` API and clones the response ID
+before retaining it. The new upstream Bolt envelope copy was reviewed and added
+to the required invariant-test registry: its destination is freshly allocated
+and has no existing readers.
+
+Full `go test ./...` passed, as did ten repetitions of the response-interrupt,
+persisted-auth and config-reload regression tests. The installed binary is
+`8.0.57-dankstation.1`, built from `9a580807`. After an idle-service restart,
+all 210 prior model IDs remained and three GPT image variants were added.
+
+The existing Codex `refresh_token_expired` failure persisted after the update;
+it requires separate OAuth recovery, not a replacement VidBee client token.
+The sanitized upgrade and authentication outcome receipt is
+`~/.local/state/cliproxyapi/upgrades/20261105-174934/receipt.json`.
+That private directory also retains the previous binary, configuration and
+credential snapshots. Source rollback is `backup/pre-upstream-20261105`.
+No fork push was performed as part of this update.
+
+## Earlier workstation update, 2026-11-01
 
 The vendor changes now live in the fork **`kriegcloud/CLIProxyAPI`**, branch
 `dankstation/main`: five `dankstation:` commits on upstream `7cad1cb7` (v8.0.51).
