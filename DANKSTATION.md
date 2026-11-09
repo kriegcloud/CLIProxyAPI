@@ -33,7 +33,18 @@ which the registry now lists. Daybreak stays routable only when a task names it:
 superseded: gpt-5.6-sol, gpt-6-sol, grok-4.6, gpt-5.6-luna, claude-opus-5, claude-opus-5-thinking-high, muse-spark-1.3, grok-4.5, gpt-5.4, gpt-5.4-mini
 <!-- beep-models:end deprecated-routable -->
 
-## Latest workstation update, 2026-11-05
+## Latest workstation update, 2026-11-08
+
+Pushed the 12 unpublished local commits, then merged upstream `681ce41b` (v8.0.61,
+24 commits) cleanly as `2f24f7a4`. `go test ./...` has two `internal/api` failures,
+`TestServerResponsesWebsocketReauthorizesEachTurn` and, with `-count=3`,
+`TestOAuthCallbackRouteSkipsManagementKeyMiddleware`. Both fail the same way on
+pristine `upstream/main` and on the pre-merge tree, and pass when run alone. After an
+idle restart all 213 model IDs remained and `gpt-6.1-sol(medium)`, `claude-opus-5-5`
+and `grok-4.7` answered. Rollback: `backup/pre-upstream-20261108` and
+`~/.local/state/cliproxyapi/upgrades/20261108/cli-proxy-api.before`.
+
+## Earlier workstation update, 2026-11-05
 
 Merged upstream `c2f402b4` (v8.0.57, 68 commits since the previous base) into
 `dankstation/main`, preserving the published vendor history and local fixes.
