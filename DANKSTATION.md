@@ -207,3 +207,13 @@ copying tokens:
 
 Symptom when it finally expires: `503 auth_unavailable: no auth available
 (providers=codex, …)` on every `gpt-*` model while `codex exec` works.
+
+## Config rendering from 1Password (2026-11-09)
+
+`~/.cli-proxy-api/config.yaml` is generated: `cli-proxy-api.service` runs
+`~/.local/bin/cli-proxy-api-render` as `ExecStartPre`, which `op inject`s
+`config.yaml.tpl` through the agent `op` shim (service account, no prompt). Secrets live as
+`op://` references in the template (Venice: `op://BEEP_SECRETS/beep-venice/credential`;
+sandbox lane client key: `op://BEEP_SECRETS/cli-proxy-sandbox-lane/credential`). Edit the
+template, then restart the service or run the render script; the proxy hot-reloads the
+written file. Management-API edits land in the rendered file and are lost on the next render.
