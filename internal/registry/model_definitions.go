@@ -30,6 +30,7 @@ const (
 
 // staticModelsJSON mirrors the top-level structure of models.json.
 type staticModelsJSON struct {
+	Copilot     []*ModelInfo `json:"copilot"`
 	Claude      []*ModelInfo `json:"claude"`
 	Gemini      []*ModelInfo `json:"gemini"`
 	Vertex      []*ModelInfo `json:"vertex"`
@@ -48,6 +49,11 @@ type staticModelsJSON struct {
 // GetClaudeModels returns the standard Claude model definitions.
 func GetClaudeModels() []*ModelInfo {
 	return cloneModelInfos(getModels().Claude)
+}
+
+// GetCopilotModels returns the Copilot presets from the active model catalog.
+func GetCopilotModels() []*ModelInfo {
+	return cloneModelInfos(getModels().Copilot)
 }
 
 // GetGeminiModels returns the standard Gemini model definitions.
@@ -621,6 +627,7 @@ func cloneModelInfos(models []*ModelInfo) []*ModelInfo {
 //   - antigravity
 //   - xai
 //   - devin
+//   - copilot
 //   - meta
 func GetStaticModelDefinitionsByChannel(channel string) []*ModelInfo {
 	key := strings.ToLower(strings.TrimSpace(channel))
@@ -643,6 +650,8 @@ func GetStaticModelDefinitionsByChannel(channel string) []*ModelInfo {
 		return GetAntigravityModels()
 	case "xai", "x-ai", "grok":
 		return GetXAIModels()
+	case "copilot":
+		return GetCopilotModels()
 	case "devin":
 		return GetDevinModels()
 	case "meta", "muse":
@@ -657,6 +666,15 @@ func GetStaticModelDefinitionsByChannel(channel string) []*ModelInfo {
 func LookupStaticModelInfoByChannel(modelID, channel string) *ModelInfo {
 	modelID = strings.TrimSpace(modelID)
 	if modelID == "" {
+		return nil
+	}
+	// Request routing needs just one definition from the immutable Copilot catalog.
+	if strings.EqualFold(strings.TrimSpace(channel), "copilot") {
+		for _, model := range getModels().Copilot {
+			if model.ID == modelID {
+				return cloneModelInfo(model)
+			}
+		}
 		return nil
 	}
 	models := GetStaticModelDefinitionsByChannel(channel)
