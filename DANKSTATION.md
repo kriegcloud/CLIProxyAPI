@@ -33,14 +33,27 @@ which the registry now lists. Daybreak stays routable only when a task names it:
 superseded: gpt-5.6-sol, gpt-6-sol, grok-4.6, gpt-5.6-luna, claude-opus-5, claude-opus-5-thinking-high, muse-spark-1.3, grok-4.5, gpt-5.4, gpt-5.4-mini
 <!-- beep-models:end deprecated-routable -->
 
-## Latest workstation update, 2026-11-18
+## Latest workstation update, 2026-11-21
+
+Merged upstream `69607634` (v8.1.0: GitHub Copilot provider, Antigravity, auth failover and
+streaming fixes) cleanly as `d1b46f3f`. One full-suite run failed
+`TestServerRejectsIncompleteUnauthenticatedRequestBodiesPromptly` (a 500 ms socket
+deadline); it then passed 12/12 alone and 4/4 full-package runs on the merge, the same as
+pristine upstream, so the cause is unknown. `TestModelsWithClientVersionReturnsCodexCatalog`
+passes again. After an idle restart all 217 model IDs remained and `gpt-6-luna`,
+`gpt-6.1-sol(medium)`, `grok-4.7` and `claude-opus-5-5` answered. Rollback: local branch
+`backup/pre-upstream-20261121` and
+`~/.local/state/cliproxyapi/upgrades/20261121/cli-proxy-api.before`.
+
+## Earlier workstation update, 2026-11-18
 
 Merged upstream `a5e8f69e` (v8.0.77, 17 commits: GPT-6.2 models, payload replace
-rules, translator media fixes) cleanly as `bfd9bb88`. Two tests fail outside our
-code. `TestModelsWithClientVersionReturnsCodexCatalog` fails identically on
+rules, translator media fixes) cleanly as `bfd9bb88`. Two tests
+failed. `TestModelsWithClientVersionReturnsCodexCatalog` fails identically on
 pristine upstream, whose GPT-6.2 catalog update left gpt-5.5 without a service
-tier. `TestServiceHeartbeatFailoverDoesNotDrainBlockingScope` fails about one run
-in six under load and passes alone. After an idle restart 217 model IDs
+tier. `TestServiceHeartbeatFailoverDoesNotDrainBlockingScope` failed about one run
+in six on the merge while the machine was busy; whether the merge caused it was not
+established (upstream and the previous main each passed only three runs). After an idle restart 217 model IDs
 (`gpt-6.2-sol` and `gpt-6.2-astra` among them) were listed, and `gpt-6-luna`,
 `gpt-6.1-sol(medium)`, `grok-4.7` and `claude-opus-5-5` answered. Rollback:
 `backup/pre-upstream-20261118` and
