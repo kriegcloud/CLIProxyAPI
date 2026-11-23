@@ -33,7 +33,22 @@ which the registry now lists. Daybreak stays routable only when a task names it:
 superseded: gpt-5.6-sol, gpt-6-sol, grok-4.6, gpt-5.6-luna, claude-opus-5, claude-opus-5-thinking-high, muse-spark-1.3, grok-4.5, gpt-5.4, gpt-5.4-mini
 <!-- beep-models:end deprecated-routable -->
 
-## Latest workstation update, 2026-11-21
+## Latest workstation update, 2026-11-22
+
+Merged upstream `6eb8554f` (v8.1.1, 36 commits: Antigravity session and credit isolation,
+Copilot/Devin routing, Gemini 4 Neon model, schema and translator fixes) cleanly as
+`1749223e`. The first full-suite run, made while a t3code build loaded the machine, failed
+`TestHandleEventConfigChangeSchedulesReload` (internal/watcher) and
+`TestServiceHeartbeatLossCancelsBlockedConfigFinalizationWithoutDrainingRegistry`
+(sdk/cliproxy). Both passed 10/10 alone on the merge and on pristine upstream. In five
+interleaved rounds of compiled package binaries the merge and the previous main had no
+failures, and pristine upstream failed sdk/cliproxy once, so the flake comes from upstream
+code. After an idle restart all 217 model IDs remained and `gpt-6-luna`, `gpt-6.1-sol`,
+`grok-4.7` and `claude-opus-5-5` answered. Rollback: local branch
+`backup/pre-upstream-20261122` and
+`~/.local/state/cliproxyapi/upgrades/20261122/cli-proxy-api.before`.
+
+## Earlier workstation update, 2026-11-21
 
 Merged upstream `69607634` (v8.1.0: GitHub Copilot provider, Antigravity, auth failover and
 streaming fixes) cleanly as `d1b46f3f`. One full-suite run failed
