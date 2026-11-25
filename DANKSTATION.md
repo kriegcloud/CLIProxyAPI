@@ -33,7 +33,20 @@ which the registry now lists. Daybreak stays routable only when a task names it:
 superseded: gpt-5.6-sol, gpt-6-sol, grok-4.6, gpt-5.6-luna, claude-opus-5, claude-opus-5-thinking-high, muse-spark-1.3, grok-4.5, gpt-5.4, gpt-5.4-mini
 <!-- beep-models:end deprecated-routable -->
 
-## Latest workstation update, 2026-11-22
+## Latest workstation update, 2026-11-25
+
+Merged upstream `38fe9295` (v8.1.4, 144 commits: Antigravity request alignment, credit
+fallback and stream error fixes, translator, Gemini, thinking-budget and auth refresh
+fixes) cleanly as `69a36810`. The full test suite passed on the first run. `go vet`
+reports an unreachable statement in `internal/translator/interactions/claude` and a copied
+`sync.Once` in `internal/pluginhost/host_test.go`; both files are identical to upstream.
+After an idle restart all 217 model IDs remained and `gpt-daybreak-blue-latest`,
+`gpt-6-luna`, `gpt-6.1-sol`, `grok-4.7` and `claude-opus-5-5` answered. The
+`candidate/dev-20261123` lane (an `upstream/dev` merge) was never deployed and was left
+alone. Rollback: local branch `backup/pre-upstream-20261125` and
+`~/.local/state/cliproxyapi/upgrades/20261125/cli-proxy-api.before`.
+
+## Earlier workstation update, 2026-11-22
 
 Merged upstream `6eb8554f` (v8.1.1, 36 commits: Antigravity session and credit isolation,
 Copilot/Devin routing, Gemini 4 Neon model, schema and translator fixes) cleanly as
